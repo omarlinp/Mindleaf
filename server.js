@@ -26,6 +26,7 @@ app.use(
   "/bjs",
   express.static(path.join(__dirname, "node_modules/bootstrap/dist/js")),
 );
+app.use("bicons", express.static(path.join(__dirname,"node_modules/bootstrap-icons/font")));
 
 //project assets
 app.use(express.static(path.join(__dirname, "public")));
