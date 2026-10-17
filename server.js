@@ -1,7 +1,7 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
-import Router from "./src/routes/index.js";
+import router from "./src/routes/index.js";
 
 //server configuration
 const __filename = fileURLToPath(import.meta.url);
@@ -12,9 +12,7 @@ const NODE_ENV = process.env.NODE_ENV || "production";
 //starting the express service
 const app = express();
 
-app.get("/", (req, res) => {
-  res.render("index");
-});
+app.use('/',router);
 app.set("view engine", "ejs");
 
 app.set("views", path.join(__dirname, "src/views"));
