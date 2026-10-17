@@ -1,3 +1,4 @@
+const $ = (id) => document.getElementById(id);
 const P = "pms_";
 const DB = {
   get(k) {
@@ -192,19 +193,4 @@ const TYPES = [
   DB.set("patients", p);
   DB.set("appts", a);
   localStorage.setItem(P + "seeded", "1");
-})();
-
-(function nav() {
-  const page = location.pathname.split("/").pop() || "/dashboard";
-  const l = [
-    ["/dashboard", "Dashboard", "speedometer2"],
-    ["/patients", "Patients", "people"],
-    ["/appointments", "Appointments", "calendar-check"],
-  ];
-  $("nav").innerHTML =
-    `<nav class="navbar navbar-expand-md topbar navbar-dark"><div class="container">
-  <a class="navbar-brand fw-bold" href="/dashboard"><img src="img/logo-nav.svg" width="30" height="30" class="me-2" alt="">Mindleaf</a>
-  <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#m" aria-label="Menu"><span class="navbar-toggler-icon"></span></button>
-  <div class="collapse navbar-collapse" id="m"><ul class="navbar-nav ms-auto align-items-md-center">${l.map((x) => `<li class="nav-item"><a class="nav-link ${page === x[0] ? "active" : ""}" href="${x[0]}"><i class="bi bi-${x[2]} me-1"></i>${x[1]}</a></li>`).join("")}
-  </ul></div></div></nav>`;
 })();

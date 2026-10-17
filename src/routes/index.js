@@ -15,6 +15,12 @@ router.get('/signup', (req,res)=> {
 router.get('/dashboard', (req,res)=> {
     res.render('dashboard');
 });
+router.get('/appointments', (req,res)=> {
+    res.render('appointments');
+});
+router.get('/patients', (req,res)=> {
+    res.render('patients');
+});
 
 
 export default router;

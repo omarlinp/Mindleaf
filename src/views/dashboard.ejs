@@ -1,22 +1,4 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dashboard · Mindleaf</title>
-    <link
-      href="/bcss/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
-      rel="stylesheet"
-    />
-    <link href="css/style.css" rel="stylesheet" />
-    <link rel="icon" type="image/svg+xml" href="img/favicon.svg" />
-  </head>
-  <body>
-    <div id="nav"></div>
+<%- include('partials/nav') %>
     <main class="container py-4">
       <h1 class="mb-4">Dashboard</h1>
       <div class="row g-3 mb-3" id="stats"></div>
@@ -26,8 +8,8 @@
         <div class="col-lg-7">
           <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between">
-              <strong>Upcoming appointments</strong
-              ><a href="appointments.html">View all</a>
+              <strong>Upcoming appointments</strong>
+              ><a href="/appointments">View all</a>
             </div>
             <ul class="list-group list-group-flush" id="upcoming"></ul>
           </div>
@@ -36,7 +18,7 @@
           <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between">
               <strong>Recent patients</strong
-              ><a href="patients.html">View all</a>
+              ><a href="/patients">View all</a>
             </div>
             <ul class="list-group list-group-flush" id="recent"></ul>
           </div>
