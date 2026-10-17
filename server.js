@@ -4,21 +4,26 @@ import { fileURLToPath} from 'url';
 import Router from './src/routes/index.js';
 
 
+
 //server configuration 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 3000;
 const NODE_ENV = process.env.NODE_ENV || 'production';
 
-
+//starting the express service
 const app = express();
 
 app.get('/',(req,res)=>{
-    res.send('hello world')
+    res.render('index');
 });
 app.set('view engine' , 'ejs');
 
 app.set('views' , path.join(__dirname,'src/views'));
+
+//Bootstrap assets 
+app.use('/bcss', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
+app.use('/bjs', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
 
 // Start the server and listen to the PORT
