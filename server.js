@@ -25,6 +25,9 @@ app.set('views' , path.join(__dirname,'src/views'));
 app.use('/bcss', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
 app.use('/bjs', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
 
+//project assets
+app.use(express.static(path.join(__dirname,'public')))
+
 
 // Start the server and listen to the PORT
 app.listen(PORT, () =>{
