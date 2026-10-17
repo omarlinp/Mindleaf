@@ -1,35 +1,38 @@
-import express from 'express';
-import path from 'path';
-import { fileURLToPath} from 'url';
-import Router from './src/routes/index.js';
+import express from "express";
+import path from "path";
+import { fileURLToPath } from "url";
+import Router from "./src/routes/index.js";
 
-
-
-//server configuration 
+//server configuration
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PORT = process.env.PORT || 3000;
-const NODE_ENV = process.env.NODE_ENV || 'production';
+const NODE_ENV = process.env.NODE_ENV || "production";
 
 //starting the express service
 const app = express();
 
-app.get('/',(req,res)=>{
-    res.render('index');
+app.get("/", (req, res) => {
+  res.render("index");
 });
-app.set('view engine' , 'ejs');
+app.set("view engine", "ejs");
 
-app.set('views' , path.join(__dirname,'src/views'));
+app.set("views", path.join(__dirname, "src/views"));
 
-//Bootstrap assets 
-app.use('/bcss', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/css')));
-app.use('/bjs', express.static(path.join(__dirname, 'node_modules/bootstrap/dist/js')));
+//Bootstrap assets
+app.use(
+  "/bcss",
+  express.static(path.join(__dirname, "node_modules/bootstrap/dist/css")),
+);
+app.use(
+  "/bjs",
+  express.static(path.join(__dirname, "node_modules/bootstrap/dist/js")),
+);
 
 //project assets
-app.use(express.static(path.join(__dirname,'public')))
-
+app.use(express.static(path.join(__dirname, "public")));
 
 // Start the server and listen to the PORT
-app.listen(PORT, () =>{
-    console.log(`Server is running and on http://127.0.0.1:${PORT}`);
+app.listen(PORT, () => {
+  console.log(`Server is running and on http://127.0.0.1:${PORT}`);
 });
