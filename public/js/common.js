@@ -1,9 +1,4 @@
-if (!Auth.current()) {
-  location.replace("login.html");
-  throw new Error("Not logged in");
-}
-const USER = Auth.current(),
-  P = `pms_${USER.id}_`;
+const P = "pms_";
 const DB = {
   get(k) {
     try {
@@ -83,7 +78,7 @@ const TYPES = [
 ];
 
 (function seedDemo() {
-  if (!USER.demo || localStorage.getItem(P + "seeded")) return;
+  if (localStorage.getItem(P + "seeded")) return;
   const p = [
     {
       id: "p1",
@@ -211,6 +206,5 @@ const TYPES = [
   <a class="navbar-brand fw-bold" href="/dashboard"><img src="img/logo-nav.svg" width="30" height="30" class="me-2" alt="">Mindleaf</a>
   <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#m" aria-label="Menu"><span class="navbar-toggler-icon"></span></button>
   <div class="collapse navbar-collapse" id="m"><ul class="navbar-nav ms-auto align-items-md-center">${l.map((x) => `<li class="nav-item"><a class="nav-link ${page === x[0] ? "active" : ""}" href="${x[0]}"><i class="bi bi-${x[2]} me-1"></i>${x[1]}</a></li>`).join("")}
-  <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown" role="button"><i class="bi bi-person-circle me-1"></i>${esc(USER.name)}</a>
-  <ul class="dropdown-menu dropdown-menu-end"><li class="dropdown-item-text small text-muted">${esc(USER.email)}<br>${esc(USER.plan)} plan</li><li><hr class="dropdown-divider"></li><li><button class="dropdown-item" onclick="Auth.logout()"><i class="bi bi-box-arrow-right me-2"></i>Log out</button></li></ul></li></ul></div></div></nav>`;
+  </ul></div></div></nav>`;
 })();
