@@ -21,6 +21,8 @@
   "packageManager": "pnpm@12.14.0",
   "type": "module",
   "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
     "ejs": "^7.0.1",
     "express": "^5.3.0",
     "path": "^0.12.7"
