@@ -1,120 +1,59 @@
 <%- include('partials/nav') %>
 
     <main class="container py-4">
-      <div
-        class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3"
-      >
+      <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
         <h1 class="mb-0">Patients</h1>
         <div class="d-flex gap-2">
-          <input
-            id="q"
-            class="form-control"
-            type="search"
-            placeholder="Search name, phone, concern"
-            aria-label="Search patients"
-          /><button class="btn btn-primary text-nowrap" onclick="openForm()">
-            <i class="bi bi-plus-lg me-1"></i>Add patient
-          </button>
+          <form class="d-flex gap-2" method="get" action="/patients">
+            <input name="q" class="form-control" type="search" placeholder="Search name, phone, concern" aria-label="Search patients" value="<%= query %>" />
+            <button class="btn btn-outline-secondary">Search</button>
+          </form>
+          <a class="btn btn-primary text-nowrap" href="/patients/new"><i class="bi bi-plus-lg me-1"></i>Add patient</a>
         </div>
       </div>
+
       <div class="card shadow-sm">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Name</th>
-                <th>Age</th>
-                <th>Gender</th>
-                <th>Phone</th>
-                <th>Presenting concern</th>
-                <th>Appointments</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
+            <thead class="table-light"><tr><th>Name</th><th>Age</th><th>Gender</th><th>Phone</th><th>Presenting concern</th><th>Appointments</th><th></th></tr></thead>
+            <tbody>
+              <% if (patients.length) { %>
+                <% patients.forEach((patient) => { %>
+                  <tr>
+                    <td><a class="fw-semibold text-decoration-none" href="/patient/<%= patient.id %>"><%= patient.name %></a><div class="small text-muted"><%= patient.email %></div></td>
+                    <td><%= patient.age %></td><td><%= patient.gender %></td><td><%= patient.phone %></td><td><%= patient.concern %></td><td><%= patient.appointmentCount %></td>
+                    <td class="text-end text-nowrap"><a class="btn btn-sm btn-primary" href="/patient/<%= patient.id %>">Open file</a> <a class="btn btn-sm btn-outline-primary" href="/patients/<%= patient.id %>/edit">Edit</a> <form class="d-inline" method="post" action="/patients/<%= patient.id %>/delete"><button class="btn btn-sm btn-outline-danger">Delete</button></form></td>
+                  </tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="7" class="text-center text-muted py-4">No patients found. Add a patient to get started.</td></tr>
+              <% } %>
+            </tbody>
           </table>
         </div>
       </div>
-      <div class="modal fade" id="modal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-          <form class="modal-content" id="form">
-            <div class="modal-header">
-              <h5 class="modal-title" id="title">Add patient</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
+
+      <% if (patientForm) { %>
+        <div class="card shadow-sm mt-4">
+          <div class="card-header bg-white"><strong><%= patientForm.id ? "Edit patient" : "Add patient" %></strong></div>
+          <form method="post" action="<%= patientForm.id ? `/patients/${patientForm.id}` : '/patients' %>">
+            <div class="card-body row g-3">
+              <div class="col-md-6"><label class="form-label" for="name">Full name</label><input id="name" name="name" class="form-control" value="<%= patientForm.name || '' %>" required /></div>
+              <div class="col-md-3"><label class="form-label" for="dob">Date of birth</label><input id="dob" name="dob" type="date" class="form-control" value="<%= patientForm.dob || '' %>" required /></div>
+              <div class="col-md-3"><label class="form-label" for="gender">Gender</label><select id="gender" name="gender" class="form-select"><% ["Female", "Male", "Other"].forEach((gender) => { %><option <%= patientForm.gender === gender ? "selected" : "" %>><%= gender %></option><% }); %></select></div>
+              <div class="col-md-4"><label class="form-label" for="phone">Phone</label><input id="phone" name="phone" type="tel" class="form-control" value="<%= patientForm.phone || '' %>" required /></div>
+              <div class="col-md-5"><label class="form-label" for="email">Email</label><input id="email" name="email" type="email" class="form-control" value="<%= patientForm.email || '' %>" /></div>
+              <div class="col-md-3"><label class="form-label" for="referral">Referred by</label><input id="referral" name="referral" class="form-control" value="<%= patientForm.referral || '' %>" /></div>
+              <div class="col-md-6"><label class="form-label" for="address">Address</label><input id="address" name="address" class="form-control" value="<%= patientForm.address || '' %>" /></div>
+              <div class="col-md-6"><label class="form-label" for="emergency">Emergency contact</label><input id="emergency" name="emergency" class="form-control" value="<%= patientForm.emergency || '' %>" placeholder="Name, phone" /></div>
+              <div class="col-12"><label class="form-label" for="concern">Presenting concern</label><input id="concern" name="concern" class="form-control" value="<%= patientForm.concern || '' %>" /></div>
+              <div class="col-12"><label class="form-label" for="notes">General notes</label><textarea id="notes" name="notes" rows="3" class="form-control"><%= patientForm.notes || '' %></textarea></div>
             </div>
-            <div class="modal-body row g-3">
-              <input type="hidden" id="pid" />
-              <div class="col-md-6">
-                <label class="form-label" for="name">Full name</label
-                ><input id="name" class="form-control" required />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label" for="dob">Date of birth</label
-                ><input id="dob" type="date" class="form-control" required />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label" for="gender">Gender</label
-                ><select id="gender" class="form-select">
-                  <option>Female</option>
-                  <option>Male</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div class="col-md-4">
-                <label class="form-label" for="phone">Phone</label
-                ><input id="phone" type="tel" class="form-control" required />
-              </div>
-              <div class="col-md-5">
-                <label class="form-label" for="email">Email</label
-                ><input id="email" type="email" class="form-control" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label" for="referral">Referred by</label
-                ><input id="referral" class="form-control" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="address">Address</label
-                ><input id="address" class="form-control" />
-              </div>
-              <div class="col-md-6">
-                <label class="form-label" for="emergency"
-                  >Emergency contact</label
-                ><input
-                  id="emergency"
-                  class="form-control"
-                  placeholder="Name, phone"
-                />
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="concern"
-                  >Presenting concern</label
-                ><input id="concern" class="form-control" />
-              </div>
-              <div class="col-12">
-                <label class="form-label" for="notes">General notes</label
-                ><textarea id="notes" rows="3" class="form-control"></textarea>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-light"
-                data-bs-dismiss="modal"
-              >
-                Cancel</button
-              ><button class="btn btn-primary">Save patient</button>
-            </div>
+            <div class="card-footer bg-white d-flex gap-2"><button class="btn btn-primary">Save patient</button><a class="btn btn-light" href="/patients">Cancel</a></div>
           </form>
         </div>
-      </div>
+      <% } %>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/patients.js"></script>
+    <script src="/bjs/bootstrap.bundle.min.js"></script>
   </body>
 </html>

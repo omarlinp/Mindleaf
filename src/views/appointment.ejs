@@ -1,80 +1,25 @@
 <%- include('partials/nav') %>
 
     <main class="container py-4">
-      <div id="missing" class="alert alert-warning d-none">
-        Appointment not found.
-        <a href="appointments.html">Back to appointments</a>
-      </div>
-      <div id="content">
-        <a id="back" class="small text-decoration-none"
-          ><i class="bi bi-arrow-left"></i> Back to patient file</a
-        >
-        <div
-          class="d-flex flex-wrap justify-content-between align-items-start mb-3"
-        >
-          <div>
-            <h1 class="mb-0" id="who"></h1>
-            <div class="text-muted" id="meta"></div>
-          </div>
-          <span id="stat" class="badge fs-6"></span>
-        </div>
-        <form class="card shadow-sm" id="form">
+      <% if (!appointment) { %>
+        <div class="alert alert-warning">Appointment not found. <a href="/appointments">Back to appointments</a></div>
+      <% } else { %>
+        <a href="<%= patient ? `/patient/${patient.id}` : '/appointments' %>" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Back to patient file</a>
+        <div class="d-flex flex-wrap justify-content-between align-items-start mb-3"><div><h1 class="mb-0"><%= patient ? patient.name : "Deleted patient" %></h1><div class="text-muted"><%= appointment.formattedDate %>, <%= appointment.time %> · <%= appointment.duration %> min · <%= appointment.type %> · <%= appointment.mode %></div></div><span class="badge fs-6 text-bg-<%= statusClass[appointment.status] %>"><%= appointment.status %></span></div>
+        <form class="card shadow-sm" method="post" action="/appointments/<%= appointment.id %>/notes">
           <div class="card-header bg-white"><strong>Session notes</strong></div>
           <div class="card-body row g-3">
-            <div class="col-md-6">
-              <label class="form-label" for="mood">Mood and presentation</label
-              ><input
-                id="mood"
-                class="form-control"
-                placeholder="e.g. Anxious, tearful, calm"
-              />
-            </div>
-            <div class="col-md-6">
-              <label class="form-label" for="risk">Risk assessment</label
-              ><select id="risk" class="form-select">
-                <option>No concerns noted</option>
-                <option>Monitor</option>
-                <option>Elevated: follow safety protocol</option>
-              </select>
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="summary">Session summary</label
-              ><textarea id="summary" rows="5" class="form-control"></textarea>
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="interventions"
-                >Interventions used</label
-              ><textarea
-                id="interventions"
-                rows="3"
-                class="form-control"
-              ></textarea>
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="progress"
-                >Progress and observations</label
-              ><textarea id="progress" rows="3" class="form-control"></textarea>
-            </div>
-            <div class="col-12">
-              <label class="form-label" for="plan">Plan and homework</label
-              ><textarea id="plan" rows="3" class="form-control"></textarea>
-            </div>
+            <div class="col-md-6"><label class="form-label" for="mood">Mood and presentation</label><input id="mood" name="mood" class="form-control" value="<%= appointment.notes?.mood || '' %>" placeholder="e.g. Anxious, tearful, calm" /></div>
+            <div class="col-md-6"><label class="form-label" for="risk">Risk assessment</label><select id="risk" name="risk" class="form-select"><% ["No concerns noted", "Monitor", "Elevated: follow safety protocol"].forEach((risk) => { %><option <%= (appointment.notes?.risk || "No concerns noted") === risk ? "selected" : "" %>><%= risk %></option><% }); %></select></div>
+            <div class="col-12"><label class="form-label" for="summary">Session summary</label><textarea id="summary" name="summary" rows="5" class="form-control"><%= appointment.notes?.summary || '' %></textarea></div>
+            <div class="col-12"><label class="form-label" for="interventions">Interventions used</label><textarea id="interventions" name="interventions" rows="3" class="form-control"><%= appointment.notes?.interventions || '' %></textarea></div>
+            <div class="col-12"><label class="form-label" for="progress">Progress and observations</label><textarea id="progress" name="progress" rows="3" class="form-control"><%= appointment.notes?.progress || '' %></textarea></div>
+            <div class="col-12"><label class="form-label" for="plan">Plan and homework</label><textarea id="plan" name="plan" rows="3" class="form-control"><%= appointment.notes?.plan || '' %></textarea></div>
           </div>
-          <div
-            class="card-footer bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center"
-          >
-            <span class="small text-muted" id="saved"></span>
-            <div class="d-flex gap-2">
-              <button type="button" class="btn btn-outline-primary" id="done">
-                Save and mark completed</button
-              ><button class="btn btn-primary">Save notes</button>
-            </div>
-          </div>
+          <div class="card-footer bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center"><span class="small text-muted"><%= appointment.notes?.savedAt ? `Last saved ${new Date(appointment.notes.savedAt).toLocaleString()}` : "Not saved yet" %></span><div class="d-flex gap-2"><button class="btn btn-outline-primary" name="action" value="complete">Save and mark completed</button><button class="btn btn-primary" name="action" value="save">Save notes</button></div></div>
         </form>
-      </div>
+      <% } %>
     </main>
     <script src="/bjs/bootstrap.bundle.min.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/session.js"></script>
   </body>
 </html>

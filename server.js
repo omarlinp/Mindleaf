@@ -12,7 +12,8 @@ const NODE_ENV = process.env.NODE_ENV || "production";
 //starting the express service
 const app = express();
 
-app.use('/',router);
+app.use(express.urlencoded({ extended: false }));
+app.use("/", router);
 app.set("view engine", "ejs");
 
 app.set("views", path.join(__dirname, "src/views"));
@@ -26,7 +27,10 @@ app.use(
   "/bjs",
   express.static(path.join(__dirname, "node_modules/bootstrap/dist/js")),
 );
-app.use("bicons", express.static(path.join(__dirname,"node_modules/bootstrap-icons/font")));
+app.use(
+  "bicons",
+  express.static(path.join(__dirname, "node_modules/bootstrap-icons/font")),
+);
 
 //project assets
 app.use(express.static(path.join(__dirname, "public")));

@@ -1,132 +1,50 @@
 <%- include('partials/nav') %>
 
     <main class="container py-4">
-      <div
-        class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3"
-      >
+      <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
         <h1 class="mb-0">Appointments</h1>
         <div class="d-flex gap-2">
-          <select id="flt" class="form-select" aria-label="Filter by status">
-            <option value="">All statuses</option>
-            <option>Scheduled</option>
-            <option>Completed</option>
-            <option>Cancelled</option></select
-          ><button class="btn btn-primary text-nowrap" onclick="openForm()">
-            <i class="bi bi-plus-lg me-1"></i>Book appointment
-          </button>
+          <form method="get" action="/appointments" class="d-flex gap-2"><select name="status" class="form-select" aria-label="Filter by status"><option value="">All statuses</option><% ["Scheduled", "Completed", "Cancelled"].forEach((option) => { %><option <%= status === option ? "selected" : "" %>><%= option %></option><% }); %></select><button class="btn btn-outline-secondary">Filter</button></form>
+          <a class="btn btn-primary text-nowrap" href="/appointments/new"><i class="bi bi-plus-lg me-1"></i>Book appointment</a>
         </div>
       </div>
       <div class="card shadow-sm">
         <div class="table-responsive">
           <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th>Date</th>
-                <th>Time</th>
-                <th>Patient</th>
-                <th>Type</th>
-                <th>Format</th>
-                <th>Status</th>
-                <th>Payment</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="rows"></tbody>
+            <thead class="table-light"><tr><th>Date</th><th>Time</th><th>Patient</th><th>Type</th><th>Format</th><th>Status</th><th>Payment</th><th></th></tr></thead>
+            <tbody>
+              <% if (appointments.length) { %>
+                <% appointments.forEach((appointment) => { %>
+                  <tr><td><%= appointment.formattedDate %></td><td><%= appointment.time %></td><td><a class="fw-semibold text-decoration-none" href="/patient/<%= appointment.pid %>"><%= appointment.patient.name %></a></td><td><%= appointment.type %></td><td><%= appointment.mode %></td><td><span class="badge text-bg-<%= statusClass[appointment.status] %>"><%= appointment.status %></span></td><td><% if (appointment.status === "Cancelled") { %><span class="text-muted small">n/a</span><% } else { %><span class="badge text-bg-<%= appointment.payment === "Paid" ? "success" : "warning" %>"><%= appointment.payment %></span><div class="small text-muted"><%= appointment.formattedFee %></div><% } %></td><td class="text-end text-nowrap"><a class="btn btn-sm btn-primary" href="/appointment/<%= appointment.id %>">Notes</a> <a class="btn btn-sm btn-outline-primary" href="/appointments/<%= appointment.id %>/edit">Edit</a> <form class="d-inline" method="post" action="/appointments/<%= appointment.id %>/delete"><button class="btn btn-sm btn-outline-danger">Delete</button></form></td></tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="8" class="text-center text-muted py-4">No appointments found. Book an appointment to get started.</td></tr>
+              <% } %>
+            </tbody>
           </table>
         </div>
       </div>
-      <div class="modal fade" id="modal" tabindex="-1">
-        <div class="modal-dialog">
-          <form class="modal-content" id="form">
-            <div class="modal-header">
-              <h5 class="modal-title" id="title">Book appointment</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
+
+      <% if (appointmentForm) { %>
+        <div class="card shadow-sm mt-4">
+          <div class="card-header bg-white"><strong><%= appointmentForm.id ? "Edit appointment" : "Book appointment" %></strong></div>
+          <form method="post" action="<%= appointmentForm.id ? `/appointments/${appointmentForm.id}` : '/appointments' %>">
+            <div class="card-body row g-3">
+              <div class="col-12"><label class="form-label" for="pid">Patient</label><select id="pid" name="pid" class="form-select" required><option value="">Select patient</option><% patients.forEach((patient) => { %><option value="<%= patient.id %>" <%= appointmentForm.pid === patient.id ? "selected" : "" %>><%= patient.name %></option><% }); %></select></div>
+              <div class="col-6"><label class="form-label" for="date">Date</label><input id="date" name="date" type="date" class="form-control" value="<%= appointmentForm.date || '' %>" required /></div>
+              <div class="col-6"><label class="form-label" for="time">Time</label><input id="time" name="time" type="time" class="form-control" value="<%= appointmentForm.time || '' %>" required /></div>
+              <div class="col-6"><label class="form-label" for="type">Session type</label><select id="type" name="type" class="form-select"><% types.forEach((type) => { %><option <%= appointmentForm.type === type ? "selected" : "" %>><%= type %></option><% }); %></select></div>
+              <div class="col-6"><label class="form-label" for="mode">Format</label><select id="mode" name="mode" class="form-select"><% ["In person", "Video", "Phone"].forEach((mode) => { %><option <%= appointmentForm.mode === mode ? "selected" : "" %>><%= mode %></option><% }); %></select></div>
+              <div class="col-6"><label class="form-label" for="duration">Duration (minutes)</label><input id="duration" name="duration" type="number" min="10" step="5" class="form-control" value="<%= appointmentForm.duration || '50' %>" required /></div>
+              <div class="col-6"><label class="form-label" for="status">Status</label><select id="status" name="status" class="form-select"><% ["Scheduled", "Completed", "Cancelled"].forEach((option) => { %><option <%= appointmentForm.status === option ? "selected" : "" %>><%= option %></option><% }); %></select></div>
+              <div class="col-6"><label class="form-label" for="fee">Fee</label><input id="fee" name="fee" type="number" min="0" step="0.01" class="form-control" value="<%= appointmentForm.fee ?? '' %>" required /></div>
+              <div class="col-6"><label class="form-label" for="payment">Payment</label><select id="payment" name="payment" class="form-select"><option <%= appointmentForm.payment === "Unpaid" ? "selected" : "" %>>Unpaid</option><option <%= appointmentForm.payment === "Paid" ? "selected" : "" %>>Paid</option></select></div>
             </div>
-            <div class="modal-body row g-3">
-              <input type="hidden" id="aid" />
-              <div class="col-12">
-                <label class="form-label" for="pid">Patient</label
-                ><select id="pid" class="form-select" required></select>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="date">Date</label
-                ><input id="date" type="date" class="form-control" required />
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="time">Time</label
-                ><input id="time" type="time" class="form-control" required />
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="type">Session type</label
-                ><select id="type" class="form-select"></select>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="mode">Format</label
-                ><select id="mode" class="form-select">
-                  <option>In person</option>
-                  <option>Video</option>
-                  <option>Phone</option>
-                </select>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="duration"
-                  >Duration (minutes)</label
-                ><input
-                  id="duration"
-                  type="number"
-                  min="10"
-                  step="5"
-                  class="form-control"
-                  required
-                />
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="status">Status</label
-                ><select id="status" class="form-select">
-                  <option>Scheduled</option>
-                  <option>Completed</option>
-                  <option>Cancelled</option>
-                </select>
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="fee">Fee</label
-                ><input
-                  id="fee"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  class="form-control"
-                  required
-                />
-              </div>
-              <div class="col-6">
-                <label class="form-label" for="payment">Payment</label
-                ><select id="payment" class="form-select">
-                  <option>Unpaid</option>
-                  <option>Paid</option>
-                </select>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button
-                type="button"
-                class="btn btn-light"
-                data-bs-dismiss="modal"
-              >
-                Cancel</button
-              ><button class="btn btn-primary">Save appointment</button>
-            </div>
+            <div class="card-footer bg-white d-flex gap-2"><button class="btn btn-primary">Save appointment</button><a class="btn btn-light" href="/appointments">Cancel</a></div>
           </form>
         </div>
-      </div>
+      <% } %>
     </main>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/appointments.js"></script>
+    <script src="/bjs/bootstrap.bundle.min.js"></script>
   </body>
 </html>

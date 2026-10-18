@@ -1,26 +1,62 @@
 <%- include('partials/nav') %>
     <main class="container py-4">
       <h1 class="mb-4">Dashboard</h1>
-      <div class="row g-3 mb-3" id="stats"></div>
+      <div class="row g-3 mb-3">
+        <% const statCards = [
+          ["Patients", dashboard.stats.patients, "people", "#0f766e"],
+          ["Today", dashboard.stats.today, "calendar-day", "#0f766e"],
+          ["Upcoming", dashboard.stats.upcoming, "calendar-event", "#0f766e"],
+          ["Completed", dashboard.stats.completed, "check2-circle", "#0f766e"]
+        ]; %>
+        <% statCards.forEach(([label, value, icon, color]) => { %>
+          <div class="col-6 col-lg-3"><div class="card stat shadow-sm" style="border-left-color:<%= color %>"><div class="card-body d-flex justify-content-between align-items-center"><div><div class="num"><%= value %></div><div class="text-muted"><%= label %></div></div><i class="bi bi-<%= icon %> fs-2" style="color:<%= color %>"></i></div></div></div>
+        <% }); %>
+      </div>
       <h2 class="h5 mt-4 mb-3">Finances</h2>
-      <div class="row g-3 mb-4" id="fin"></div>
+      <div class="row g-3 mb-4">
+        <% const financeCards = [
+          ["Total not paid", dashboard.finances.unpaidTotal, "cash-stack", "#b45309"],
+          ["Appointments not paid", dashboard.finances.unpaidCount, "hourglass-split", "#b45309"],
+          ["Total paid", dashboard.finances.paidTotal, "check2-circle", "#0f766e"],
+          ["Appointments paid", dashboard.finances.paidCount, "receipt", "#0f766e"]
+        ]; %>
+        <% financeCards.forEach(([label, value, icon, color]) => { %>
+          <div class="col-6 col-lg-3"><div class="card stat shadow-sm" style="border-left-color:<%= color %>"><div class="card-body d-flex justify-content-between align-items-center"><div><div class="num"><%= value %></div><div class="text-muted"><%= label %></div></div><i class="bi bi-<%= icon %> fs-2" style="color:<%= color %>"></i></div></div></div>
+        <% }); %>
+      </div>
       <div class="row g-4 mb-4">
         <div class="col-lg-7">
           <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between">
               <strong>Upcoming appointments</strong>
-              ><a href="/appointments">View all</a>
+              <a href="/appointments">View all</a>
             </div>
-            <ul class="list-group list-group-flush" id="upcoming"></ul>
+            <ul class="list-group list-group-flush">
+              <% if (dashboard.upcoming.length) { %>
+                <% dashboard.upcoming.forEach((appointment) => { %>
+                  <li class="list-group-item d-flex justify-content-between"><div><a class="fw-semibold text-decoration-none" href="/appointment?id=<%= appointment.id %>"><%= appointment.patient.name %></a><div class="small text-muted"><%= appointment.type %> · <%= appointment.mode %></div></div><div class="text-end small"><%= appointment.formattedDate %><br><%= appointment.time %></div></li>
+                <% }); %>
+              <% } else { %>
+                <li class="list-group-item text-muted py-4 text-center">Nothing scheduled. <a href="/appointments">Book an appointment</a></li>
+              <% } %>
+            </ul>
           </div>
         </div>
         <div class="col-lg-5">
           <div class="card shadow-sm h-100">
             <div class="card-header bg-white d-flex justify-content-between">
-              <strong>Recent patients</strong
-              ><a href="/patients">View all</a>
+              <strong>Recent patients</strong>
+              <a href="/patients">View all</a>
             </div>
-            <ul class="list-group list-group-flush" id="recent"></ul>
+            <ul class="list-group list-group-flush">
+              <% if (dashboard.recentPatients.length) { %>
+                <% dashboard.recentPatients.forEach((patient) => { %>
+                  <li class="list-group-item"><a class="fw-semibold text-decoration-none" href="/patient?id=<%= patient.id %>"><%= patient.name %></a><div class="small text-muted"><%= patient.age %> yrs · <%= patient.concern || "No concern noted" %></div></li>
+                <% }); %>
+              <% } else { %>
+                <li class="list-group-item text-muted py-4 text-center">No patients yet. <a href="/patients">Add a patient</a></li>
+              <% } %>
+            </ul>
           </div>
         </div>
       </div>
@@ -45,7 +81,15 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody id="unpaid"></tbody>
+            <tbody>
+              <% if (dashboard.unpaid.length) { %>
+                <% dashboard.unpaid.forEach((appointment) => { %>
+                  <tr><td><%= appointment.formattedDate %><div class="small text-muted"><%= appointment.time %></div></td><td><a class="fw-semibold text-decoration-none" href="/patient/<%= appointment.pid %>"><%= appointment.patient.name %></a></td><td><%= appointment.type %></td><td><span class="badge text-bg-<%= appointment.status === "Completed" ? "success" : appointment.status === "Cancelled" ? "secondary" : "primary" %>"><%= appointment.status %></span></td><td class="text-end"><%= appointment.formattedFee %></td><td class="text-end"><form method="post" action="/appointments/<%= appointment.id %>/payment"><input type="hidden" name="payment" value="Paid" /><button class="btn btn-sm btn-primary">Mark paid</button></form></td></tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="6" class="text-center text-muted py-4">Everything is paid. Nothing outstanding.</td></tr>
+              <% } %>
+            </tbody>
           </table>
         </div>
       </div>
@@ -67,13 +111,19 @@
                 <th></th>
               </tr>
             </thead>
-            <tbody id="paid"></tbody>
+            <tbody>
+              <% if (dashboard.paid.length) { %>
+                <% dashboard.paid.forEach((appointment) => { %>
+                  <tr><td><%= appointment.formattedDate %><div class="small text-muted"><%= appointment.time %></div></td><td><a class="fw-semibold text-decoration-none" href="/patient/<%= appointment.pid %>"><%= appointment.patient.name %></a></td><td><%= appointment.type %></td><td><%= appointment.formattedPaidOn || "Not recorded" %></td><td class="text-end"><%= appointment.formattedFee %></td><td class="text-end"><form method="post" action="/appointments/<%= appointment.id %>/payment"><input type="hidden" name="payment" value="Unpaid" /><button class="btn btn-sm btn-outline-secondary">Mark unpaid</button></form></td></tr>
+                <% }); %>
+              <% } else { %>
+                <tr><td colspan="6" class="text-center text-muted py-4">No payments recorded yet.</td></tr>
+              <% } %>
+            </tbody>
           </table>
         </div>
       </div>
     </main>
     <script src="/bjs/bootstrap.bundle.min.js"></script>
-    <script src="js/common.js"></script>
-    <script src="js/dashboard.js"></script>
   </body>
 </html>
