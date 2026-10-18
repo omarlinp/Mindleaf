@@ -1,23 +1,92 @@
 <%- include('partials/nav') %>
 
-    <main class="container py-4">
+    <main class="container-xxl py-4">
       <% if (!appointment) { %>
         <div class="alert alert-warning">Appointment not found. <a href="/appointments">Back to appointments</a></div>
       <% } else { %>
-        <a href="<%= patient ? `/patient/${patient.id}` : '/appointments' %>" class="small text-decoration-none"><i class="bi bi-arrow-left"></i> Back to patient file</a>
-        <div class="d-flex flex-wrap justify-content-between align-items-start mb-3"><div><h1 class="mb-0"><%= patient ? patient.name : "Deleted patient" %></h1><div class="text-muted"><%= appointment.formattedDate %>, <%= appointment.time %> · <%= appointment.duration %> min · <%= appointment.type %> · <%= appointment.mode %></div></div><span class="badge fs-6 text-bg-<%= statusClass[appointment.status] %>"><%= appointment.status %></span></div>
-        <form class="card shadow-sm" method="post" action="/appointments/<%= appointment.id %>/notes">
-          <div class="card-header bg-white"><strong>Session notes</strong></div>
-          <div class="card-body row g-3">
-            <div class="col-md-6"><label class="form-label" for="mood">Mood and presentation</label><input id="mood" name="mood" class="form-control" value="<%= appointment.notes?.mood || '' %>" placeholder="e.g. Anxious, tearful, calm" /></div>
-            <div class="col-md-6"><label class="form-label" for="risk">Risk assessment</label><select id="risk" name="risk" class="form-select"><% ["No concerns noted", "Monitor", "Elevated: follow safety protocol"].forEach((risk) => { %><option <%= (appointment.notes?.risk || "No concerns noted") === risk ? "selected" : "" %>><%= risk %></option><% }); %></select></div>
-            <div class="col-12"><label class="form-label" for="summary">Session summary</label><textarea id="summary" name="summary" rows="5" class="form-control"><%= appointment.notes?.summary || '' %></textarea></div>
-            <div class="col-12"><label class="form-label" for="interventions">Interventions used</label><textarea id="interventions" name="interventions" rows="3" class="form-control"><%= appointment.notes?.interventions || '' %></textarea></div>
-            <div class="col-12"><label class="form-label" for="progress">Progress and observations</label><textarea id="progress" name="progress" rows="3" class="form-control"><%= appointment.notes?.progress || '' %></textarea></div>
-            <div class="col-12"><label class="form-label" for="plan">Plan and homework</label><textarea id="plan" name="plan" rows="3" class="form-control"><%= appointment.notes?.plan || '' %></textarea></div>
+        <a href="<%= patient ? `/patient/${patient.id}` : '/appointments' %>" class="small text-decoration-none">
+          <i class="bi bi-arrow-left me-1"></i>Back to patient file
+        </a>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mt-2 mb-4">
+          <div>
+            <h1 class="mb-1"><%= patient ? patient.name : "Deleted patient" %></h1>
+            <p class="text-muted mb-0">Session notes and appointment details</p>
           </div>
-          <div class="card-footer bg-white d-flex flex-wrap gap-2 justify-content-between align-items-center"><span class="small text-muted"><%= appointment.notes?.savedAt ? `Last saved ${new Date(appointment.notes.savedAt).toLocaleString()}` : "Not saved yet" %></span><div class="d-flex gap-2"><button class="btn btn-outline-primary" name="action" value="complete">Save and mark completed</button><button class="btn btn-primary" name="action" value="save">Save notes</button></div></div>
-        </form>
+          <span class="badge fs-6 text-bg-<%= statusClass[appointment.status] %>"><%= appointment.status %></span>
+        </div>
+
+        <div class="row g-4 align-items-start">
+          <aside class="col-lg-4 col-xl-3">
+            <div class="card shadow-sm sticky-lg-top" style="top: 1.5rem">
+              <div class="card-header bg-white">
+                <strong><i class="bi bi-calendar-check me-2 text-primary"></i>Appointment details</strong>
+              </div>
+              <dl class="card-body mb-0">
+                <dt class="small text-muted fw-normal">Patient</dt>
+                <dd class="mb-3"><% if (patient) { %><a href="/patient/<%= patient.id %>"><%= patient.name %></a><% } else { %>Deleted patient<% } %></dd>
+                <dt class="small text-muted fw-normal">Date</dt>
+                <dd class="mb-3"><%= appointment.formattedDate %></dd>
+                <dt class="small text-muted fw-normal">Time</dt>
+                <dd class="mb-3"><%= appointment.time %></dd>
+                <dt class="small text-muted fw-normal">Duration</dt>
+                <dd class="mb-3"><%= appointment.duration %> minutes</dd>
+                <dt class="small text-muted fw-normal">Session type</dt>
+                <dd class="mb-3"><%= appointment.type %></dd>
+                <dt class="small text-muted fw-normal">Format</dt>
+                <dd class="mb-3"><%= appointment.mode %></dd>
+                <dt class="small text-muted fw-normal">Payment</dt>
+                <dd class="mb-0"><span class="badge text-bg-<%= appointment.payment === "Paid" ? "success" : "warning" %>"><%= appointment.payment %></span> <span class="text-muted"><%= `$${Number(appointment.fee || 0).toFixed(2)}` %></span></dd>
+              </dl>
+              <% if (patient) { %>
+                <div class="card-footer bg-white"><a class="btn btn-sm btn-outline-primary w-100" href="/appointments/<%= appointment.id %>/edit"><i class="bi bi-pencil me-1"></i>Edit appointment</a></div>
+              <% } %>
+            </div>
+          </aside>
+
+          <section class="col-lg-8 col-xl-9">
+            <form class="card shadow-sm" method="post" action="/appointments/<%= appointment.id %>/notes">
+              <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <strong><i class="bi bi-journal-text me-2 text-primary"></i>Session notes</strong>
+                <span class="small text-muted"><%= appointment.notes?.savedAt ? `Last saved ${new Date(appointment.notes.savedAt).toLocaleString()}` : "Not saved yet" %></span>
+              </div>
+              <div class="card-body row g-4">
+                <div class="col-xl-6">
+                  <label class="form-label" for="mood">Mood and presentation</label>
+                  <input id="mood" name="mood" class="form-control" value="<%= appointment.notes?.mood || '' %>" placeholder="e.g. Anxious, tearful, calm" />
+                </div>
+                <div class="col-xl-6">
+                  <label class="form-label" for="risk">Risk assessment</label>
+                  <select id="risk" name="risk" class="form-select">
+                    <% ["No concerns noted", "Monitor", "Elevated: follow safety protocol"].forEach((risk) => { %>
+                      <option <%= (appointment.notes?.risk || "No concerns noted") === risk ? "selected" : "" %>><%= risk %></option>
+                    <% }); %>
+                  </select>
+                </div>
+                <div class="col-xl-7">
+                  <label class="form-label" for="summary">Session summary</label>
+                  <textarea id="summary" name="summary" rows="7" class="form-control"><%= appointment.notes?.summary || '' %></textarea>
+                </div>
+                <div class="col-xl-5">
+                  <label class="form-label" for="interventions">Interventions used</label>
+                  <textarea id="interventions" name="interventions" rows="7" class="form-control"><%= appointment.notes?.interventions || '' %></textarea>
+                </div>
+                <div class="col-xl-7">
+                  <label class="form-label" for="progress">Progress and observations</label>
+                  <textarea id="progress" name="progress" rows="6" class="form-control"><%= appointment.notes?.progress || '' %></textarea>
+                </div>
+                <div class="col-xl-5">
+                  <label class="form-label" for="plan">Plan and homework</label>
+                  <textarea id="plan" name="plan" rows="6" class="form-control"><%= appointment.notes?.plan || '' %></textarea>
+                </div>
+              </div>
+              <div class="card-footer bg-white d-flex flex-wrap gap-2 justify-content-end">
+                <button class="btn btn-outline-primary" name="action" value="complete">Save and mark completed</button>
+                <button class="btn btn-primary" name="action" value="save">Save notes</button>
+              </div>
+            </form>
+          </section>
+        </div>
       <% } %>
     </main>
     <script src="/bjs/bootstrap.bundle.min.js"></script>
