@@ -8,7 +8,10 @@
   A calm, simple practice-management dashboard for psychologists.
 </p>
 
-Mindleaf brings patient records, appointments, session notes, and payment tracking together in one lightweight web application. The current repository is a server-rendered demo/prototype with sample data included so the dashboard can be explored immediately.
+Mind leaf is a patient management system that allows independent professionals in the medical sector to better organize, manage, and coordinate their patient. The system is mainly targeted to physiologist and psychiatrists
+
+The purpose of writing the software is to provide a better way for doctor to manage their patient, keep track of upcoming appointments and better manage their bills. 
+
 
 ## Features
 
@@ -31,7 +34,6 @@ Mindleaf brings patient records, appointments, session notes, and payment tracki
 - Bootstrap Icons
 - JSON file persistence in `data/patients-appointments.json`
 
-## Getting started
 
 ### Prerequisites
 
@@ -91,8 +93,17 @@ pnpm start
 ├── server.js                       # Express application entry point
 └── package.json
 ```
+## Future Work
 
+* sign up page
+* bill generator
+* proper database setup
 
+## Software Demo
+* https://youtu.be/4omXmfnQ_K8
+
+## Website link
+https://mindleaf-ahh9.onrender.com/
 
 ## License
 
